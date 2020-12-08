@@ -47,9 +47,11 @@ def random_translation(text, n):
 #print(langs_dict)
 
 def info(update, context):
-    update.message.reply_text("""Täyskäännösbotti kääntää tekstejä. Yksinkertaisimmillaan botti tunnistaa kielen ja kääntää sen viiden satunnaisen kielen kautta alkuperäiseen tunnistettuun kieleen. Konepellin alle voi kurkistaa lisäämällä sulut "()" kenoviivakomennon ja tekstin väliin. Lisäasetuksia voi lisätä sulkujen sisälle, esim.
+    update.message.reply_text("""Täyskäännösbotti kääntää tekstejä komennolla '/kaanna käännettävä teksti'. Yksinkertaisimmillaan botti tunnistaa kielen ja kääntää sen neljän satunnaisen kielen kautta alkuperäiseen tunnistettuun kieleen. Konepellin alle voi kurkistaa lisäämällä sulut "()" vinoviivakomennon ja tekstin väliin. Lisäasetuksia voi lisätä sulkujen sisälle, esim.
+• (fi) asettaa aloituskieleksi suomenkielen ja kääntää neljän satunnaisen kielen kautta takaisin suomenkieleen. Botti on välillä huono tunnistamaan kieliä, joten tätä kannattaa käyttää.
 • (7) kääntää tekstin seitsemän satunnaisen kielen kautta.
-• (fi) asettaa aloituskieleksi suomenkielen ja kääntää viiden satunnaisen kielen kautta takaisin suomenkieleen. Botti on välillä huono tunnistamaan kieliä, joten tätä kannattaa käyttää.
+
+Kenoviivakomennolla /laulu botti arpoo pakollisen ja kääntää sen. Laulut tukevat myös lisämääreitä täysin edellämainitulla tavalla, esim. '/laulu (0 estonian)'.
 
  - Advanced -
 Kahden tai useamman termin syöttäminen asettaa koko kääntösarjan.
@@ -105,7 +107,7 @@ def translate_commands(input, print_option):
     
     # jos komentorivi on tyhjä => 4 rand. kieltä
     if len(commands) == 0:
-      commands.append(5)
+      commands.append(4)
     
     if len(commands) == 1 and isinstance(commands[-1], int) and commands[-1] == 0:
       return printcondition(text,meta,print_option)
@@ -138,7 +140,7 @@ def translate_commands(input, print_option):
     
     # Jos komennossa oli vain yksi kieli, tee 4 randomia
     if len(commands) == 0:
-      commands = [5]
+      commands = [4]
     
     ### Keskellä olevat komennot
     while limit > 0 and len(commands) > 0 and( len(commands) > 1 or (isinstance(commands[-1], int) and commands[-1] > 0) ):
@@ -206,7 +208,7 @@ def translate_commands(input, print_option):
     meta.append(rev_lang_dict[prev_lang] + " => " + rev_lang_dict[next_lang])
     return printcondition(text,meta,print_option)
   else:
-    return random_translation(input,5)
+    return random_translation(input,4)
 
 def printcondition(text,meta,print_option):
   if print_option:
@@ -463,8 +465,8 @@ def main():
   print("Bot started")
 
   # Add command handler to dispatcher
-  kenoviiva_translate_handler = CommandHandler('tk',translate_kenoviiva)
-  info_handler = CommandHandler('info',info)
+  kenoviiva_translate_handler = CommandHandler('kaanna',translate_kenoviiva)
+  info_handler = CommandHandler('start',info)
   langs_handler = CommandHandler('kielet',print_langs)
   merimies_handler = CommandHandler('laulu',merimies)
   
