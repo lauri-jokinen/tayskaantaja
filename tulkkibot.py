@@ -21,6 +21,11 @@ from deep_translator import (GoogleTranslator, single_detection)
 with open("/home/lowpaw/Downloads/telegram-koodeja.json") as json_file:
     koodit = json.load(json_file)
 
+def googleTrans(a, b, text):
+  sleep(0.2)
+  return GoogleTranslator(source=a, target=b).translate(text)
+
+'''
 def random_translation(text, n):
   orig_lang = single_detection(text, api_key=koodit["tekstintunnistus"])
   #print("Alkp. " + orig_lang)
@@ -37,24 +42,25 @@ def random_translation(text, n):
     while next_lang == last_lang or orig_lang == next_lang:
       next_lang = random.choice(langs_list)
     #print(next_lang)
-    text = GoogleTranslator(source=last_lang, target=next_lang).translate(text)
+    text = googleTrans(last_lang, next_lang, text)
     last_lang = next_lang
     
   text = GoogleTranslator(source=next_lang, target=orig_lang).translate(text)
   return text
+'''
 
 #langs_dict = GoogleTranslator.get_supported_languages(as_dict=True)
 #print(langs_dict)
 
 def info(update, context):
-    update.message.reply_text("""Täyskäännösbotti kääntää tekstejä komennolla '/kaanna käännettävä teksti'. Yksinkertaisimmillaan botti tunnistaa kielen ja kääntää sen neljän satunnaisen kielen kautta alkuperäiseen tunnistettuun kieleen. Konepellin alle voi kurkistaa lisäämällä sulut "()" vinoviivakomennon ja tekstin väliin. Lisäasetuksia voi lisätä sulkujen sisälle, esim.
+  text = """Täyskäännösbotti kääntää tekstejä komennolla '/kaanna käännettävä teksti'. Yksinkertaisimmillaan botti tunnistaa kielen ja kääntää sen neljän satunnaisen kielen kautta alkuperäiseen tunnistettuun kieleen. Konepellin alle voi kurkistaa lisäämällä sulut "()" vinoviivakomennon ja tekstin väliin. Lisäasetuksia voi lisätä sulkujen sisälle, esim.
 • (fi) asettaa aloituskieleksi suomenkielen ja kääntää neljän satunnaisen kielen kautta takaisin suomenkieleen. Botti on välillä huono tunnistamaan kieliä, joten tätä kannattaa käyttää.
 • (7) kääntää tekstin seitsemän satunnaisen kielen kautta.
 
 Kenoviivakomennolla /laulu botti arpoo pakollisen ja kääntää sen. Laulut tukevat myös lisämääreitä täysin edellämainitulla tavalla, esim. '/laulu (0 estonian)'.
 
  - Advanced -
-Kahden tai useamman termin syöttäminen asettaa koko kääntösarjan.
+Kahden tai useamman termin syöttäminen sulkujen sisään asettaa koko kääntösarjan, esim.
 • (en fi 2 estonian) aloituskieli englanti, kääntö en => fi, kääntö kahden satunnaisen kielen kautta, ja lopuksi kääntö viroksi.
 • (2 en) numero alussa (myös nolla kelpaa): tunnistaa kielen ja kääntää kahden satunnaisen kielen kautta tekstin englanniksi.
 • (en 5) numero lopussa (myös nolla kelpaa): botti palauttaa lopuksi tekstin alkuperäisellä kielelllä, tässä esimerkissä viiden satunnaisen kielen kautta englanniksi.
@@ -63,7 +69,13 @@ Kahden tai useamman termin syöttäminen asettaa koko kääntösarjan.
 
  - Bugit -
 Botti ei osaa puhua mm. ruotsia, norjaa tai tanskaa. Ongelma on Lapan tavoittamattomissa, mutta saattaa korjaantua Python-pakettien päivittyessä.
-""")
+"""
+  commands = update.message.text
+  commands = " ".join(commands.split(" ")[1:])
+  commands = remove_spaces_from_front(commands)
+  if commands == "":
+    return update.message.reply_text(text)
+  return update.message.reply_text(translate_commands(commands + text, True))
 
 def translate_commands(input, print_option):
   
@@ -95,7 +107,7 @@ def translate_commands(input, print_option):
         "nothing"
     
     # komennon jälkenen osuus
-    text = input.split(")")[1]
+    text = ")".join(input.split(")")[1:])
     
     # kokeile, onko tekstikenttä tyhjä
     text = remove_spaces_from_front(text)
@@ -158,7 +170,6 @@ def translate_commands(input, print_option):
         
       elif commands[0] in lang_longs:
         next_lang = lang_dict[commands[0]]
-        next_lang = commands[0]
         commands.pop(0)
         if next_lang == prev_lang:
           continue
@@ -170,7 +181,7 @@ def translate_commands(input, print_option):
       if len(text) >= 5000:
         return "Ihan hyvä, mut koitappa vähän lyhempää tekstiä."
       try:
-        text = GoogleTranslator(source=prev_lang, target=next_lang).translate(text)
+        text = googleTrans(last_lang, next_lang, text)
       except:
         return "Ööö jotain meni pieleen käännöksen aikana... yritä uudelleen."
       meta.append(rev_lang_dict[prev_lang] + " => " + rev_lang_dict[next_lang])
@@ -202,13 +213,14 @@ def translate_commands(input, print_option):
     if len(text) >= 5000:
       return "Ihan hyvä, mut koitappa vähän lyhempää tekstiä."
     try:
-      text = GoogleTranslator(source=prev_lang, target=next_lang).translate(text)
+      text = googleTrans(last_lang, next_lang, text)
     except:
       return "Ööö jotain meni pieleen käännöksen aikana... yritä uudelleen."
     meta.append(rev_lang_dict[prev_lang] + " => " + rev_lang_dict[next_lang])
     return printcondition(text,meta,print_option)
   else:
-    return random_translation(input,4)
+    #return random_translation(input,4)
+    return translate_commands("(4) " + input, False)
 
 def printcondition(text,meta,print_option):
   if print_option:
@@ -350,6 +362,175 @@ Yhteinen juolalulumme luistaa,
 juhlamieli on parhaimmillaan, trallalla.
 Yhteinen juolalulumme luistaa,
 juhlamieli on parhaimmillaan.
+""", """Juomalaulu
+
+Ei veteen lähtehellä saa veikot tirkistellä,
+vaan viini pikariin, vaan viini pikariin.
+
+Ei vesiin voida luottaa, mut viini riemun tuottaa,
+siks' tirkistämme niin,
+vain viini pikariin, (pikariin), pikariin, pikariin.
+Vain viini pikariin, (pikariin), pikariin, pikariin.
+Vain viini pikariin, vain viini pikariin, vain viini pikariin,
+pikariin, pikariin, pikariin, pikariin.
+
+Ei veteen lähtehellä saa veikot tirkistellä,
+vaan viini pikariin, vaan viini pikariin.
+
+Ei vesiin voida luottaa, mut viina riemun tuottaa,
+siks' tirkistämme niin,
+vain viina pikariin, (pikariin), pikariin, pikariin.
+Vain viina pikariin, (pikariin), pikariin, pikariin.
+Vain viina pikariin, vain viina pikariin, vain viina pikariin,
+pikariin, pikariin, pikariin, pikariin.
+""", """Kolmas
+
+Nyt yksi juotu on ja toista kaadetaan,
+mut vatsa pohjaton, mut vatsa pohjaton,
+on vielä janoissaan.
+Siis kolmas sille suo, siis kolmas sille suo,
+ja malja pohjahan nyt juo!
+""", """Koskenkorva
+
+Nostakaamme malja, Koskenkorvaa on.
+Väljentyköön kalja mallas kelvoton.
+Riemuella suo, siispä veikko juo.
+Riemuella suo, siispä veikko juo.
+
+Kalja voimallansa meitä innostaa,
+Koskenkorvan kanssa mielet nostattaa.
+Lohdutusta tuo, siispä veikko juo.
+Lohdutusta tuo, siispä veikko juo.
+""","""Viljaviinaa
+
+Viljaviinaa maistetaan,
+viljaviinaa, siitä ryypyn saa!
+Viljaviinaa, lauletaan,
+sillä kaukaiset aarteet me aukaistaan.
+
+Viljaviinaa maistetaan,
+viljaviinaa, siitä ryypyn saa!
+Viljaviinaa, trallalaa,
+sillä kaukaiset aarteet me aukaistaan.
+
+Leijonaa toiset meille haluaa suosittaa,
+Koskenkorvaa, Vaakuna viinaa.
+Kuinka on, jos Wyborova sitsimme juhlistaa?
+Onko Tasavalta, Alkuviina,
+Metsästäjän, Kalastajan,
+Perinne, Tyrnävä, Smirnoff parempaa?
+
+(Skåll!)
+
+Viljaviinaa,
+
+Viljaviinaa maistetaan,
+viljaviinaa, siitä ryypyn saa!
+Viljaviinaa, trallalaa,
+sillä äänemme myöskin me aukaistaan.
+Absolut!
+""", """Juhannus
+
+Minä avaan syömeni selälleen
+ja annan päivän paistaa,
+minä tahdon kylpeä joka veen
+ja joka marjan maistaa.
+
+Minun mielessäni on juhannus
+ja juhla ja mittumaari,
+ja jos minä illoin itkenkin,
+niin siellä on sateenkaari.
+""", """Kevätlaulu
+
+Niitty jälleen vihannoipi,
+nurmi kukkii tuoksuen.
+
+Peipon riemusävel soipi,
+leivo lentää laulellen.
+Peipon riemusävel soipi,
+leivo lentää laulellen.
+
+Metsä muuttuu ihanaksi,
+lemmen ääni kaikuvi.
+Metsä muuttuu ihanaksi,
+lemmen ääni kaikuvi.
+
+Paimen yltyy rohkeemmaksi,
+neitonen on hellempi.
+Paimen yltyy rohkeemmaksi,
+neitonen on hellempi.
+
+Neitonen on hellempi.
+""", """Laulajain lippu
+
+Lippusemme kohouupi
+taivahille sinisille.
+Joka silmä riemastuupi,
+Laulu lausuu sydämmille.
+(P! K!)
+
+Eespäin veljet käykäämme,
+riemu (viini) olkoon seuramme,.
+Yli vuorten, laaksoin, järvein, metsäin,
+Laulu kaikukoon,
+Hurraa, hurraa, hurraa, hurraa!
+Nyt laulu kaikukoon, hurraa!
+
+Nyt kukka rannalla,
+maistella aiomma maljasta.
+Siis sinne menkäämme,
+nyt riemuimme, nyt riemuimme.
+
+El' itke neitosein!
+Ruusu ei kuolla saa poskelta.
+Sylissäs valkamain,
+mä etsin vain, mä etsin vain.
+""", """Mieslaulu
+
+Pois voihke ja itkun hyrske,
+käy työhön ja toimintaan!
+Pois hento ja toivoton tyrske,
+ei viel’ ole kuolema maan!
+Ole kylmä kuin kallio jäinen
+ja jäntevän itsepäinen
+elinvoimasi ponnistaan,
+elinvoimasi ponnistaan.
+
+Pois harkinta, anna mit’ annat!
+Mikä liiaksi kallist’ ois?
+Jos säkkiä saiturin kannat,
+jäät kunniakaartista pois.
+Pien’ itsesi anna ja siitä
+sinä kansasi suuruus niitä!
+Se kaunista, suurta lois,
+se kaunista, suurta lois.
+""", """Sirkka
+
+Sirkka lauloi lystiksensä,
+oman intonsa ilossa,
+huviksensa hyräeli,
+metisellä mättähällä,
+simakukkien seassa.
+
+Päivä paistoi nurmen nunnut,
+kukat kultaiset kedolla,
+Katselivat, kuultelivat,
+kun hän laulella liritti.
+
+”Mitä laulat laiska roisto,
+hullutuksia hyräilet?
+Teehän työtä; eihän vatsa
+täyty tyhjistä loruista;
+Raipat selkään semmoiselle”
+Torui muuan muurahainen,
+ylen itara itikka,
+Sirkan syytöntä iloa.
+
+Sirkka lauloi lystiksensä,
+oman intonsa ilossa,
+huviksensa hyräeli,
+metisellä mättähällä,
+simakukkien seassa.
 """, """Merimiäste läksilaul
 
 Ulos mailmaha viä
