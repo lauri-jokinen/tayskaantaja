@@ -15,14 +15,14 @@ import json
 #import argparse
 #import cv2
 import random
-
+import time
 from deep_translator import (GoogleTranslator, single_detection)
 
-with open("/home/lowpaw/Downloads/telegram-koodeja.json") as json_file:
+with open("/home/lapa/Downloads/telegram-koodeja.json") as json_file:
     koodit = json.load(json_file)
 
 def googleTrans(a, b, text):
-  sleep(0.2)
+  time.sleep(0.2)
   return GoogleTranslator(source=a, target=b).translate(text)
 
 '''
@@ -150,6 +150,9 @@ def translate_commands(input, print_option):
     prev_lang = orig_lang
     next_lang = orig_lang
     
+    if not (orig_lang in lang_shorts):
+      return "Teksti tunnistettiin kieleksi '" + orig_lang + "', mutta sitä ei löydy Googlesta. Määrittele aloituskieli, esim '\kaanna (fi) tämä on suomea'."
+    
     # Jos komennossa oli vain yksi kieli, tee 4 randomia
     if len(commands) == 0:
       commands = [4]
@@ -180,10 +183,10 @@ def translate_commands(input, print_option):
         
       if len(text) >= 5000:
         return "Ihan hyvä, mut koitappa vähän lyhempää tekstiä."
-      try:
-        text = googleTrans(last_lang, next_lang, text)
-      except:
-        return "Ööö jotain meni pieleen käännöksen aikana... yritä uudelleen."
+      #try:
+      text = googleTrans(prev_lang, next_lang, text)
+      #except:
+      #  return "Ööö jotain meni pieleen käännöksen aikana... yritä uudelleen."
       meta.append(rev_lang_dict[prev_lang] + " => " + rev_lang_dict[next_lang])
       prev_lang = next_lang
       limit -= 1
@@ -213,7 +216,7 @@ def translate_commands(input, print_option):
     if len(text) >= 5000:
       return "Ihan hyvä, mut koitappa vähän lyhempää tekstiä."
     try:
-      text = googleTrans(last_lang, next_lang, text)
+      text = googleTrans(prev_lang, next_lang, text)
     except:
       return "Ööö jotain meni pieleen käännöksen aikana... yritä uudelleen."
     meta.append(rev_lang_dict[prev_lang] + " => " + rev_lang_dict[next_lang])
