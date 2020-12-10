@@ -25,33 +25,6 @@ def googleTrans(a, b, text):
   time.sleep(0.2)
   return GoogleTranslator(source=a, target=b).translate(text)
 
-'''
-def random_translation(text, n):
-  orig_lang = single_detection(text, api_key=koodit["tekstintunnistus"])
-  #print("Alkp. " + orig_lang)
-  #langs_list = GoogleTranslator.get_supported_languages()
-  langs_list = list(GoogleTranslator.get_supported_languages(as_dict=True).values())
-  
-  if orig_lang in langs_list:
-    last_lang = orig_lang
-  else:
-    return "Teksti tunnistettiin kieleksi '" + orig_lang + "', mutta se ei ole saatavilla Google-kääntässä. Anna aloituskieli erikseen esim. '/kaanna (fi) käännettävä teksti'."
-  
-  for i in range(n):
-    next_lang = random.choice(langs_list)
-    while next_lang == last_lang or orig_lang == next_lang:
-      next_lang = random.choice(langs_list)
-    #print(next_lang)
-    text = googleTrans(last_lang, next_lang, text)
-    last_lang = next_lang
-    
-  text = GoogleTranslator(source=next_lang, target=orig_lang).translate(text)
-  return text
-'''
-
-#langs_dict = GoogleTranslator.get_supported_languages(as_dict=True)
-#print(langs_dict)
-
 def info(update, context):
   text = """Täyskäännösbotti kääntää tekstejä komennolla '/kaanna käännettävä teksti'. Yksinkertaisimmillaan botti tunnistaa kielen ja kääntää sen neljän satunnaisen kielen kautta alkuperäiseen tunnistettuun kieleen. Konepellin alle voi kurkistaa lisäämällä sulut "()" vinoviivakomennon ja tekstin väliin. Lisäasetuksia voi lisätä sulkujen sisälle, esim.
 • (fi) asettaa aloituskieleksi suomenkielen ja kääntää neljän satunnaisen kielen kautta takaisin suomenkieleen. Botti on välillä huono tunnistamaan kieliä, joten tätä kannattaa käyttää.
@@ -275,54 +248,25 @@ def merimies(update, context):
   texts = ["""My Evaline
 
 My Evaline,
-say you'll be mine!
-Whisper to me honey you'll be mine!
-Way down yonder in the old corn field
-for you I'll pine.
-Sweeter than the honey to the honey bee,
-I love you,
-say you love me.
-Meet me in the shade
-of the old apple tree,
-My Eva, Iva, Ova, Evaline.
+say you'll be mine! Whisper to me honey you'll be mine! Way down yonder in the old corn field for you I'll pine. Sweeter than the honey to the honey bee, I love you, say you love me. Meet me in the shade of the old apple tree, My Eva, Iva, Ova, Evaline.
 """, """Kaunehin maa
 
-Maa kaunein maa on pohjoinen,
-missä metsiä pellot pelkää,
-karu, paatinen kylmä on pinta sen,
-ei lannista aura sen selkää,
-mut uhmaten hongat harmaat ain
-sen taivahan ääriä saartaa,
-ja yllä korpien vaikenevain,
-ja yllä korpien vaikenevain,
-sen pilvissä kotkat kaartaa.
+Maa kaunein maa on pohjoinen, missä metsiä pellot pelkää, karu, paatinen kylmä on pinta sen, ei lannista aura sen selkää,
+mut uhmaten hongat harmaat ain sen taivahan ääriä saartaa,
+ja yllä korpien vaikenevain, ja yllä korpien vaikenevain, sen pilvissä kotkat kaartaa.
 
-Maa kaunein maa on metsien,
-maa kaukaisen, uinuvan haaveen,
-se sitoo mielemme hiljaisen
-laill' arvoituksen ja aaveen.
-Se kutsuu, se kiehtoo, se vaatii luo
-sen puissa on loihtua, taikaa
-ja synkän salon kankahat nuo,
-ja synkän salon kankahat nuo,
-ne laulua kummaa kaikaa.
+Maa kaunein maa on metsien, maa kaukaisen, uinuvan haaveen, se sitoo mielemme hiljaisen laill' arvoituksen ja aaveen.
+Se kutsuu, se kiehtoo, se vaatii luo sen puissa on loihtua, taikaa
+ja synkän salon kankahat nuo, ja synkän salon kankahat nuo, ne laulua kummaa kaikaa.
 """, """Suomalainen rukous
 
-Siunaa ja varjele meitä,
-Korkein, kädelläs.
-Kaitse ain kansamme teitä
-vyöttäen voimalla meitä
-heikkoja edessäs.
-Sulta on kaikki suuruus,
-henki sun hengestäs.
+Siunaa ja varjele meitä, Korkein, kädelläs.
+Kaitse ain kansamme teitä vyöttäen voimalla meitä
+Heikkoja edessäs. Sulta on kaikki suuruus, henki sun hengestäs.
 
-Tutkien sydämemme
-silmäs meihin luo.
-Ettemme harhaan kääntyis,
-ettei kansamme nääntyis,
-silmäsi meihin luo.
-Alati synnyinmaalle
-siipies suoja suo.
+Tutkien sydämemme silmäs meihin luo.
+Ettemme harhaan kääntyis, ettei kansamme nääntyis,
+Silmäsi meihin luo. Alati synnyinmaalle, siipies suoja suo.
 """, """Suomen laulu
 Kuule, kuinka soitto kaikuu, Väinön kanteleesta raikuu!
 Laulu Suomen on! Laulu Suomen on!
@@ -335,262 +279,167 @@ Sydäntä jos suotu sulle, murheess', ilossakin kuule
 Suomen laulua! Suomen laulua!
 """, """Ylioppilaslaulu
 
-Kaikukoon nyt laulu maamme
-Niin kuin ukko jyrisee
-Kaikki eespäin astukaamme
-Sydän lämmin sykkäilee
-Laulusta me voiman saamme
-Laulu syömmen aukaisee
+Kaikukoon nyt laulu maamme niin kuin ukko jyrisee.
+Kaikki eespäin astukaamme, sydän lämmin sykkäilee.
+Laulusta me voiman saamme, laulu syömmen aukaisee.
 
-Siis nyt käsikkäissä teemme
-Laulain valan kallihin
-Veri, henki Suomellemme
-Terve, Maamme rakkahin
-Veren antain Suomellemme, teemme
-Veljet valan kallihin
+Siis nyt käsikkäissä teemme, laulain valan kallihin.
+Veri, henki Suomellemme Terve, Maamme rakkahin.
+Veren antain Suomellemme, teemme Veljet valan kallihin.
 """, """Hyvät ystävät
 
-Hyvät ystävät juhla voi alkaa,
-sankarille me nostamme maljaa!
+Hyvät ystävät juhla voi alkaa, sankarille me nostamme maljaa!
 
-Tääl ei juodakaan kolmosen kaljaa,
-meille viihdyn suo shampanja vain, trallalla.
-Tääl ei juodakaan kolmosen kaljaa,
-meille viihdyn suo shampanja vain.
+Tääl ei juodakaan kolmosen kaljaa, meille viihdyn suo shampanja vain, trallalla.
+Tääl ei juodakaan kolmosen kaljaa, meille viihdyn suo shampanja vain.
 
-Hauska juomia kurkkuun on suistaa,
-siten teekkariaikoja muistaa.
+Hauska juomia kurkkuun on suistaa, siten teekkariaikoja muistaa.
 
-Yhteinen juolalulumme luistaa,
-juhlamieli on parhaimmillaan, trallalla.
-Yhteinen juolalulumme luistaa,
-juhlamieli on parhaimmillaan.
+Yhteinen juolalulumme luistaa, juhlamieli on parhaimmillaan, trallalla.
+Yhteinen juolalulumme luistaa, juhlamieli on parhaimmillaan.
 """, """Juomalaulu
 
-Ei veteen lähtehellä saa veikot tirkistellä,
-vaan viini pikariin, vaan viini pikariin.
+Ei veteen lähtehellä saa veikot tirkistellä, vaan viini pikariin, vaan viini pikariin.
 
-Ei vesiin voida luottaa, mut viini riemun tuottaa,
-siks' tirkistämme niin,
+Ei vesiin voida luottaa, mut viini riemun tuottaa, siks' tirkistämme niin,
 vain viini pikariin, (pikariin), pikariin, pikariin.
 Vain viini pikariin, (pikariin), pikariin, pikariin.
 Vain viini pikariin, vain viini pikariin, vain viini pikariin,
 pikariin, pikariin, pikariin, pikariin.
 
-Ei veteen lähtehellä saa veikot tirkistellä,
-vaan viini pikariin, vaan viini pikariin.
+Ei veteen lähtehellä saa veikot tirkistellä, vaan viini pikariin, vaan viini pikariin.
 
-Ei vesiin voida luottaa, mut viina riemun tuottaa,
-siks' tirkistämme niin,
+Ei vesiin voida luottaa, mut viina riemun tuottaa, siks' tirkistämme niin,
 vain viina pikariin, (pikariin), pikariin, pikariin.
 Vain viina pikariin, (pikariin), pikariin, pikariin.
 Vain viina pikariin, vain viina pikariin, vain viina pikariin,
 pikariin, pikariin, pikariin, pikariin.
 """, """Kolmas
 
-Nyt yksi juotu on ja toista kaadetaan,
-mut vatsa pohjaton, mut vatsa pohjaton,
-on vielä janoissaan.
-Siis kolmas sille suo, siis kolmas sille suo,
-ja malja pohjahan nyt juo!
+Nyt yksi juotu on ja toista kaadetaan, mut vatsa pohjaton, mut vatsa pohjaton, on vielä janoissaan.
+Siis kolmas sille suo, siis kolmas sille suo, ja malja pohjahan nyt juo!
 """, """Koskenkorva
 
-Nostakaamme malja, Koskenkorvaa on.
-Väljentyköön kalja mallas kelvoton.
-Riemuella suo, siispä veikko juo.
-Riemuella suo, siispä veikko juo.
+Nostakaamme malja, Koskenkorvaa on. Väljentyköön kalja mallas kelvoton.
+Riemuella suo, siispä veikko juo. Riemuella suo, siispä veikko juo.
 
-Kalja voimallansa meitä innostaa,
-Koskenkorvan kanssa mielet nostattaa.
-Lohdutusta tuo, siispä veikko juo.
-Lohdutusta tuo, siispä veikko juo.
+Kalja voimallansa meitä innostaa, Koskenkorvan kanssa mielet nostattaa.
+Lohdutusta tuo, siispä veikko juo. Lohdutusta tuo, siispä veikko juo.
 ""","""Viljaviinaa
 
-Viljaviinaa maistetaan,
-viljaviinaa, siitä ryypyn saa!
-Viljaviinaa, lauletaan,
-sillä kaukaiset aarteet me aukaistaan.
+Viljaviinaa maistetaan, viljaviinaa, siitä ryypyn saa!
+Viljaviinaa, lauletaan, sillä kaukaiset aarteet me aukaistaan.
 
-Viljaviinaa maistetaan,
-viljaviinaa, siitä ryypyn saa!
-Viljaviinaa, trallalaa,
-sillä kaukaiset aarteet me aukaistaan.
+Viljaviinaa maistetaan, viljaviinaa, siitä ryypyn saa!
+Viljaviinaa, trallalaa, sillä kaukaiset aarteet me aukaistaan.
 
-Leijonaa toiset meille haluaa suosittaa,
-Koskenkorvaa, Vaakuna viinaa.
-Kuinka on, jos Wyborova sitsimme juhlistaa?
-Onko Tasavalta, Alkuviina,
-Metsästäjän, Kalastajan,
-Perinne, Tyrnävä, Smirnoff parempaa?
+Leijonaa toiset meille haluaa suosittaa, Koskenkorvaa, Vaakuna viinaa.
+Kuinka on, jos Wyborova sitsimme juhlistaa? Onko Tasavalta, Alkuviina,
+Metsästäjän, Kalastajan, Perinne, Tyrnävä, Smirnoff parempaa?
 
 (Skåll!)
 
 Viljaviinaa,
 
-Viljaviinaa maistetaan,
-viljaviinaa, siitä ryypyn saa!
-Viljaviinaa, trallalaa,
-sillä äänemme myöskin me aukaistaan.
+Viljaviinaa maistetaan, viljaviinaa, siitä ryypyn saa!
+Viljaviinaa, trallalaa, sillä äänemme myöskin me aukaistaan.
 Absolut!
 """, """Juhannus
 
-Minä avaan syömeni selälleen
-ja annan päivän paistaa,
-minä tahdon kylpeä joka veen
-ja joka marjan maistaa.
+Minä avaan syömeni selälleen ja annan päivän paistaa, minä tahdon kylpeä joka veen ja joka marjan maistaa.
 
-Minun mielessäni on juhannus
-ja juhla ja mittumaari,
-ja jos minä illoin itkenkin,
-niin siellä on sateenkaari.
+Minun mielessäni on juhannus ja juhla ja mittumaari, ja jos minä illoin itkenkin, niin siellä on sateenkaari.
 """, """Kevätlaulu
 
-Niitty jälleen vihannoipi,
-nurmi kukkii tuoksuen.
+Niitty jälleen vihannoipi, nurmi kukkii tuoksuen.
 
-Peipon riemusävel soipi,
-leivo lentää laulellen.
-Peipon riemusävel soipi,
-leivo lentää laulellen.
+Peipon riemusävel soipi, leivo lentää laulellen.
+Peipon riemusävel soipi, leivo lentää laulellen.
 
-Metsä muuttuu ihanaksi,
-lemmen ääni kaikuvi.
-Metsä muuttuu ihanaksi,
-lemmen ääni kaikuvi.
+Metsä muuttuu ihanaksi, lemmen ääni kaikuvi.
+Metsä muuttuu ihanaksi, lemmen ääni kaikuvi.
 
-Paimen yltyy rohkeemmaksi,
-neitonen on hellempi.
-Paimen yltyy rohkeemmaksi,
-neitonen on hellempi.
+Paimen yltyy rohkeemmaksi, neitonen on hellempi.
+Paimen yltyy rohkeemmaksi, neitonen on hellempi.
 
 Neitonen on hellempi.
 """, """Laulajain lippu
 
-Lippusemme kohouupi
-taivahille sinisille.
-Joka silmä riemastuupi,
-Laulu lausuu sydämmille.
+Lippusemme kohouupi taivahille sinisille.
+Joka silmä riemastuupi, laulu lausuu sydämmille.
 (P! K!)
 
-Eespäin veljet käykäämme,
-riemu (viini) olkoon seuramme,.
-Yli vuorten, laaksoin, järvein, metsäin,
-Laulu kaikukoon,
-Hurraa, hurraa, hurraa, hurraa!
-Nyt laulu kaikukoon, hurraa!
+Eespäin veljet käykäämme, riemu (viini) olkoon seuramme,.
+Yli vuorten, laaksoin, järvein, metsäin laulu kaikukoon,
+Hurraa, hurraa, hurraa, hurraa! Nyt laulu kaikukoon, hurraa!
 
-Nyt kukka rannalla,
-maistella aiomma maljasta.
-Siis sinne menkäämme,
-nyt riemuimme, nyt riemuimme.
+Nyt kukka rannalla, maistella aiomma maljasta.
+Siis sinne menkäämme, nyt riemuimme, nyt riemuimme.
 
-El' itke neitosein!
-Ruusu ei kuolla saa poskelta.
-Sylissäs valkamain,
-mä etsin vain, mä etsin vain.
+El' itke neitosein! Ruusu ei kuolla saa poskelta.
+Sylissäs valkamain, mä etsin vain, mä etsin vain.
 """, """Mieslaulu
 
-Pois voihke ja itkun hyrske,
-käy työhön ja toimintaan!
-Pois hento ja toivoton tyrske,
-ei viel’ ole kuolema maan!
-Ole kylmä kuin kallio jäinen
-ja jäntevän itsepäinen
-elinvoimasi ponnistaan,
-elinvoimasi ponnistaan.
+Pois voihke ja itkun hyrske, käy työhön ja toimintaan!
+Pois hento ja toivoton tyrske, ei viel’ ole kuolema maan!
+Ole kylmä kuin kallio jäinen ja saatanan itsepäinen
+elinvoimasi ponnistaan, elinvoimasi ponnistaan.
 
-Pois harkinta, anna mit’ annat!
-Mikä liiaksi kallist’ ois?
-Jos säkkiä saiturin kannat,
-jäät kunniakaartista pois.
-Pien’ itsesi anna ja siitä
-sinä kansasi suuruus niitä!
-Se kaunista, suurta lois,
-se kaunista, suurta lois.
+Pois harkinta, anna mit’ annat! Mikä liiaksi kallist’ ois?
+Jos säkkiä saiturin kannat, jäät kunniakaartista pois.
+Pien’ itsesi anna ja siitä sinä kansasi suuruus niitä!
+Se kaunista, suurta lois, se kaunista, suurta lois.
 """, """Sirkka
 
-Sirkka lauloi lystiksensä,
-oman intonsa ilossa,
-huviksensa hyräeli,
-metisellä mättähällä,
-simakukkien seassa.
+Sirkka lauloi lystiksensä, oman intonsa ilossa, huviksensa hyräeli, metisellä mättähällä, simakukkien seassa.
+Päivä paistoi nurmen nunnut, kukat kultaiset kedolla, katselivat, kuultelivat, kun hän laulella liritti.
 
-Päivä paistoi nurmen nunnut,
-kukat kultaiset kedolla,
-Katselivat, kuultelivat,
-kun hän laulella liritti.
+”Mitä laulat laiska roisto, hullutuksia hyräilet? Teehän työtä; eihän vatsa täyty tyhjistä loruista; Raipat selkään semmoiselle”
+Torui muuan muurahainen, ylen itara itikka, Sirkan syytöntä iloa.
 
-”Mitä laulat laiska roisto,
-hullutuksia hyräilet?
-Teehän työtä; eihän vatsa
-täyty tyhjistä loruista;
-Raipat selkään semmoiselle”
-Torui muuan muurahainen,
-ylen itara itikka,
-Sirkan syytöntä iloa.
-
-Sirkka lauloi lystiksensä,
-oman intonsa ilossa,
-huviksensa hyräeli,
-metisellä mättähällä,
-simakukkien seassa.
+Sirkka lauloi lystiksensä, oman intonsa ilossa, huviksensa hyräeli, metisellä mättähällä, simakukkien seassa.
 """, """Merimiäste läksilaul
 
-Ulos mailmaha viä
-Meijä jäljetön diä
-Merell laudottem bääll.
-Kauas pois pala miäl,
+Ulos mailmaha viä meijä jäljetön diä
+Merell laudottem bääll. Kauas pois pala miäl,
 Kauas sinn, misä auring ai lämmindäs lua,
 Misä huajuvap palmu meill varjoas sua.
 Ko siällt tarppeks o olt, ni mek kotti jällt tlee.
 Hiivuvee, haaluvee, hiivuvee.
 
-Meri käy, must o yä,
-Purjep paukku ja lyä,
-Köyde vingu ja soi.
-Kapteen huuta: »Ohoi,
+Meri käy, must o yä, purjep paukku ja lyä,
+Köyde vingu ja soi. Kapteen huuta: »Ohoi,
 Ylös mastoihi reivaman goht joka miäs,
 Ny o viimene hetk meijän dullk kukatiäs!»
 Jumal tiätä, jos koska mek kotti jällt tlee.
 Hiivuvee, haaluvee, hiivuvee.
 
-Kyll se muuttu se retk;
-Alka riammune hetk.
-Niingon gomppassi neul
-Meijä astian geul
-Käändy pohjossi. Lämmiä maa jäävät taa,
+Kyll se muuttu se retk; alka riammune hetk.
+Niingon gomppassi neul meijä astian geul,
+käändy pohjossi. Lämmiä maa jäävät taa,
 Kodoranna me nähd saa ja syndymämaa.
 Ilo siilo o suur, ko mek kotti jällt tlee.
 Hiivuvee, haaluvee, hiivuvee.
 """, """September
 
-Märkä syys ja pehmee maa
-tulee kuin paljo hedelmää jakaa.
+Märkä syys ja pehmee maa, tulee kuin paljo hedelmää jakaa.
 
-Nyt sinä kylvä talvi siement,
-laske myös verta koska lystänt.
+Nyt sinä kylvä talvi siement, laske myös verta koska lystänt.
 
-Sisällykset, suolet ja muu
-ei lääkitä salli syyskuu.
+Sisällykset, suolet ja muu, ei lääkitä salli syyskuu.
 """, """Kevätsointuja
 
-Taas leivoset ilmassa leikkiä lyö,
-Kevätvirsiä viidakko kaikaa.
-Suli hanget ja nousi jo kukkien vyö.
-Sinilaine jo lyö ja jo valkeni yö.
-Nyt on toivoon ja lempeen aikaa.
+Taas leivoset ilmassa leikkiä lyö, kevätvirsiä viidakko kaikaa.
+Suli hanget ja nousi jo kukkien vyö. Sinilaine jo lyö ja jo valkeni yö.
+Nyt on toivoon ja lempeen aikaa, nyt on toivoon ja lempeen aikaa.
 
-Nyt rinnass' on lämpö, mi murtavi jään,
-Joka huokuili henkeä hallan.
-Ja se vaativi voittoa kirkkahan sään.
-Elon onnea laulaa se enteillään,
-Kevättunteille tuottavi vallan.
+Nyt rinnass' on lämpö, mi murtavi jään, joka huokuili henkeä hallan.
+Ja se vaativi voittoa kirkkahan sään. Elon onnea laulaa se enteillään.
+Kevättunteille tuottavi vallan, kevättunteille tuottavi vallan.
 
-Nyt tunnen kuin sieluni siivet sais
-Ja ma leivona nousta voisin.
-Ja mun tahtoni talvesta ponnahtais
-Ja mun riemuni oikean kaiun sais,
-Ja ma oikea laulaja oisin!
+Nyt tunnen kuin sieluni siivet saisj a ma leivona nousta voisin.
+Ja mun tahtoni talvesta ponnahtais ja mun riemuni oikean kaiun sais,
+Ja ma oikea laulaja oisin, ja ma oikea laulaja oisin!
 """, """Hän kulkevi kuin yli kukkien
 
 Hän kulkevi kuin yli kukkien,
@@ -604,31 +453,20 @@ sinis laulujen laineilla käydä hän saa
 ja kulkea kukkien päällä!
 """, """Sukkalaulu
 
-Sukkia valittaessa kannattaa aina tukeutua puvun väriin.
+Sukkia valittaessa kannattaa aina tukeutua puvun väriin. Silloin sukat eivät missään tapauksessa näytä turhan räikeiltä.
 
-Silloin sukat eivät missään tapauksessa näytä turhan räikeiltä.
-
-Sukkien värin valitseminen myös kenkien mukaan johtaa yleensä hyvään lopputulokseen.
-
-Sukkien värin valitseminen myös kenkien mukaan johtaa yleensä kivaan lopputulokseen.
+Sukkien värin valitseminen myös kenkien mukaan johtaa yleensä hyvään lopputulokseen. Sukkien värin valitseminen myös kenkien mukaan johtaa yleensä kivaan lopputulokseen.
 """, """Kaikille on Koskenkorva
 
-Tempasikin, oo-o,
-Tempasikin, oo-o.
+Tempasikin, oo-o, tempasikin, oo-o.
 
-Toisille jallu on juhlaa,
-toisista rommi paras on.
-Toinen taas rahansa tuhlaa
-konjakin nautintohon.
+Toisille jallu on juhlaa, toisista rommi paras on.
+Toinen taas rahansa tuhlaa konjakin nautintohon.
 
-Mut kaikille on Koskenkorva,
-juoma paras ja virkistävin.
-Ai-jai-jai-ja-ai, Koskenkorva
-meidät mukaansa tempasikin.
+Mut kaikille on Koskenkorva, juoma paras ja virkistävin.
+Ai-jai-jai-ja-ai, Koskenkorva meidät mukaansa tempasikin.
 
-Tempasikin, oo-o,
-Tempasikin, oo-o,
-...
+Tempasikin, oo-o, tempasikin, oo-o, ...
 Tša-tša-tša!
 """]
   text = random.choice(texts)
