@@ -99,8 +99,10 @@ def translate_commands(input, print_option):
     
     ### Eka komento, kontrolloi kielen tunnistusta
     if isinstance(commands[0], int):
-      orig_lang = single_detection(text, api_key=koodit["tekstintunnistus"])
-      #commands[0] -= 1
+      try:
+        orig_lang = single_detection(text, api_key=koodit["tekstintunnistus"])
+      except:
+        return "Odottamaton käänne tekstintunnistuksessa. Yritä uudelleen."
       if commands[0] <= 0: # if zero, remove the number
         commands.pop(0)
       
@@ -117,7 +119,10 @@ def translate_commands(input, print_option):
       commands.pop(0)
       
     else: # tunnista kieli, jos komento on tuntematon
-      orig_lang = single_detection(text, api_key=koodit["tekstintunnistus"])
+      try:
+        orig_lang = single_detection(text, api_key=koodit["tekstintunnistus"])
+      except:
+        return "Odottamaton käänne tekstintunnistuksessa. Yritä uudelleen."
       commands.pop(0)
     
     prev_lang = orig_lang
@@ -156,10 +161,10 @@ def translate_commands(input, print_option):
         
       if len(text) >= 5000:
         return "Ihan hyvä, mut koitappa vähän lyhempää tekstiä."
-      #try:
-      text = googleTrans(prev_lang, next_lang, text)
-      #except:
-      #  return "Ööö jotain meni pieleen käännöksen aikana... yritä uudelleen."
+      try:
+        text = googleTrans(prev_lang, next_lang, text)
+      except:
+        return "Odottamaton käänne. Yritä uudelleen."
       meta.append(rev_lang_dict[prev_lang] + " => " + rev_lang_dict[next_lang])
       prev_lang = next_lang
       limit -= 1
@@ -191,11 +196,10 @@ def translate_commands(input, print_option):
     try:
       text = googleTrans(prev_lang, next_lang, text)
     except:
-      return "Ööö jotain meni pieleen käännöksen aikana... yritä uudelleen."
+      return "Odottamaton käänne. Yritä uudelleen."
     meta.append(rev_lang_dict[prev_lang] + " => " + rev_lang_dict[next_lang])
     return printcondition(text,meta,print_option)
   else:
-    #return random_translation(input,4)
     return translate_commands("(4) " + input, False)
 
 def printcondition(text,meta,print_option):
@@ -219,7 +223,6 @@ def remove_spaces_from_front(text):
 def pick_random_language(orig_lang, prev_lang, next_lang):
   lang_dict = GoogleTranslator.get_supported_languages(as_dict=True)
   lang_shorts = list(lang_dict.values())
-  #next_lang = random.choice(lang_shorts)
   while next_lang == prev_lang or next_lang == orig_lang:
     next_lang = random.choice(lang_shorts)
   return next_lang
