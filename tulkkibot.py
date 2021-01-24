@@ -18,7 +18,7 @@ import random
 import time
 from deep_translator import (GoogleTranslator, single_detection)
 
-with open("/home/lapa/Downloads/telegram-koodeja.json") as json_file:
+with open("/home/lowpaw/Downloads/telegram-koodeja.json") as json_file:
     koodit = json.load(json_file)
 
 def googleTrans(a, b, text):
