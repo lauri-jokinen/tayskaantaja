@@ -487,7 +487,7 @@ def main():
   # Create Updater object and attach dispatcher to it
   updater = Updater(koodit["kääntöbot"])
   dispatcher = updater.dispatcher
-  print("Bot started")
+  print("Täyskääntäjä started")
 
   # Add command handler to dispatcher
   kenoviiva_translate_handler = CommandHandler('kaanna',translate_kenoviiva)
