@@ -1,19 +1,6 @@
 # - *- coding: utf- 8 - *-
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
-#import requests
-#import re
 import json
-#import isbnlib
-#from isbnlib.registry import bibformatters
-#from datetime import datetime
-#import datetime as d
-#import time
-#import math
-#import urllib
-#from tqdm import tqdm
-#from pyzbar import pyzbar
-#import argparse
-#import cv2
 import random
 import time
 from deep_translator import (GoogleTranslator, single_detection)
@@ -26,7 +13,7 @@ def googleTrans(a, b, text):
   return GoogleTranslator(source=a, target=b).translate(text)
 
 def info(update, context):
-  text = """Täyskäännösbotti kääntää tekstejä komennolla '/kaanna käännettävä teksti'. Yksinkertaisimmillaan botti tunnistaa kielen ja kääntää sen neljän satunnaisen kielen kautta alkuperäiseen tunnistettuun kieleen. Konepellin alle voi kurkistaa lisäämällä sulut "()" vinoviivakomennon ja tekstin väliin. Lisäasetuksia voi lisätä sulkujen sisälle, esim.
+  text = """Täyskäännösbotti kääntää tekstejä komennolla '/kaanna käännettävä teksti'. Yksinkertaisimmillaan botti tunnistaa kielen ja kääntää sen viiden satunnaisen kielen kautta alkuperäiseen tunnistettuun kieleen. Konepellin alle voi kurkistaa lisäämällä sulut "()" vinoviivakomennon ja tekstin väliin. Lisäasetuksia voi lisätä sulkujen sisälle, esim.
 • (fi) asettaa aloituskieleksi suomenkielen ja kääntää neljän satunnaisen kielen kautta takaisin suomenkieleen. Botti on välillä huono tunnistamaan kieliä, joten tätä kannattaa käyttää.
 • (7) kääntää tekstin seitsemän satunnaisen kielen kautta.
 
@@ -133,7 +120,7 @@ def translate_commands(input, print_option):
     
     # Jos komennossa oli vain yksi kieli, tee 4 randomia
     if len(commands) == 0:
-      commands = [4]
+      commands = [5]
     
     ### Keskellä olevat komennot
     while limit > 0 and len(commands) > 0 and( len(commands) > 1 or (isinstance(commands[-1], int) and commands[-1] > 0) ):
@@ -237,7 +224,9 @@ def translate_kenoviiva(update, context):
     text = remove_spaces_from_front(text)
     if text == "":
       return
+    waiting_message = update.message.reply_text("Odota hetki... vedän narusta...")
     update.message.reply_text(translate_commands(text, True))
+    waiting_message.delete()
 
 def print_langs(update, context):
   lang_dict = GoogleTranslator.get_supported_languages(as_dict=True)
@@ -248,6 +237,7 @@ def print_langs(update, context):
   update.message.reply_text("Tuetut kielet: " + ", ".join(text) + ".")
 
 def merimies(update, context):
+  waiting_message = update.message.reply_text("Odota hetki... vedän narusta...")
   texts = ["""My Evaline
 
 My Evaline,
@@ -477,10 +467,14 @@ Tša-tša-tša!
   commands = " ".join(commands.split(" ")[1:])
   commands = remove_spaces_from_front(commands)
   if commands == "" and text == texts[0]: # enkunkieliset
-    return update.message.reply_text(translate_commands("(en) " + text, False))
+    update.message.reply_text(translate_commands("(en) " + text, False))
+    waiting_message.delete()
   elif commands == "": # suomenkieliset
-    return update.message.reply_text(translate_commands("(fi) " + text, False))
-  return update.message.reply_text(translate_commands(commands + text, True))
+    update.message.reply_text(translate_commands("(fi) " + text, False))
+    waiting_message.delete()
+  else:
+    update.message.reply_text(translate_commands(commands + text, True))
+    waiting_message.delete()
   
 def main():
   
