@@ -4,16 +4,113 @@ import json
 import random
 import time
 from deep_translator import (GoogleTranslator, single_detection)
+import openai, requests
+import urllib.parse
 
 with open("/home/lowpaw/Downloads/telegram-koodeja.json") as json_file:
     koodit = json.load(json_file)
 
+
+def text_completion(update, context): # no translations
+  # remove /-command from prompt
+  prompt = remove_first_word(update.message.text)
+  #print(prompt)
+  waiting_message = update.message.reply_text("Odota hetki... vedän narusta...")
+  
+  #res = text_completion_openai(prompt) + '\n(openAI)'
+  res = text_completion_textsynth(prompt) + '\n(textsynth)'
+  
+  res = remove_extra_spaces(res)
+  update.message.reply_text("<b>"+prompt+"</b>" + res, parse_mode='HTML')
+  waiting_message.delete()
+
+
+####################################################
+def text_completion_old(update, context):
+  # remove /-command from prompt
+  prompt = remove_first_word(update.message.text)
+  
+  orig_lang = single_detection(prompt, api_key=koodit["tekstintunnistus"])
+  print(orig_lang)
+  
+  if orig_lang=='et':
+    orig_lang='fi'
+  if orig_lang=='en':
+    prompt_en = prompt
+  else:
+    prompt_en = translate_commands("({} en) ".format(orig_lang) + prompt, False)
+  print(prompt_en)
+  
+  waiting_message = update.message.reply_text("Odota hetki... vedän narusta...")
+  
+  #res = text_completion_openai(prompt_en) + '\n(openAI)'
+  res = text_completion_textsynth(prompt_en) + '\n(textsynth)'
+  res = prompt_en+res
+  if orig_lang!='en':
+    res = translate_commands("(en {}) ".format(orig_lang) + res, False)
+  res = remove_extra_spaces(res)
+  update.message.reply_text(res)
+  #update.message.reply_text("<b>"+prompt+"</b>" + res, parse_mode='HTML')
+  waiting_message.delete()
+
+def text_completion_openai(prompt):
+  openai.api_key = koodit['openAI']
+  max_tokens = 200
+  response = openai.Completion.create(engine="text-davinci-002", prompt=prompt, temperature=1.0,max_tokens=max_tokens)
+  return response["choices"][0]["text"]
+
+def text_completion_textsynth(prompt):
+  max_tokens = 200
+  api_key = koodit["textsynth"]
+  data = {"prompt": prompt, "max_tokens": max_tokens}
+  url = "https://api.textsynth.com/v1/engines/gptj_6B/completions"
+  headers = {"Authorization" : "Bearer "+api_key, "Content-Type" : "application/json"}
+  r = requests.post(url, json=data, headers=headers)
+  #print(r.json())
+  if 'status' in r.json() and r.json()['status'] == 429:
+    return "... 24h quota tuli vastaan :("
+  return r.json()['text']
+
 def googleTrans(a, b, text):
-  time.sleep(0.2)
+  #time.sleep(0.2)
   return GoogleTranslator(source=a, target=b).translate(text)
 
+def remove_first_word(s):
+    # removes first word and spaces after it
+    spaces = [' ', '\n', '\t']
+    p = 0
+    no_mark_in_input = True
+    for space_mark in spaces:
+        if space_mark in s:
+            no_mark_in_input = False
+            break
+    if no_mark_in_input: return ''
+    while not (s[p] in spaces): p=p+1
+    while (s[p] in spaces): p=p+1
+    return s[p:]
+
+def remove_extra_spaces(s):
+    # removes double spaces and triple \n's
+    if len(s) >= 3:
+        p = 0
+        while p < len(s)-2:
+            if s[p:(p+3)] == '\n\n\n':
+                s = s[0:p] + s[(p+1):]
+            else: p=p+1
+    if len(s) >= 2:
+        p = 0
+        while p < len(s)-1:
+            if s[p:(p+2)] == '  ':
+                s = s[0:p] + s[(p+1):]
+            else: p=p+1
+    return s
+
 def info(update, context):
-  text = """Täyskäännösbotti kääntää tekstejä komennolla '/kaanna käännettävä teksti'. Yksinkertaisimmillaan botti tunnistaa kielen ja kääntää sen viiden satunnaisen kielen kautta alkuperäiseen tunnistettuun kieleen. Konepellin alle voi kurkistaa lisäämällä sulut "()" vinoviivakomennon ja tekstin väliin. Lisäasetuksia voi lisätä sulkujen sisälle, esim.
+  text = """Botissa on kaksi toimintoa: tekstin jatkaminen ja kääntö.
+
+Tekstin jatkaminen tapahtuu esimerkiksi komennolla '/jatka Olipa kerran'. Englanninkielinen syöte toimii paremmin kuin suomenkielinen.
+
+Kääntäminen tapahtuu komennolla '/kaanna käännettävä teksti'. Yksinkertaisimmillaan botti tunnistaa kielen ja kääntää sen viiden satunnaisen kielen kautta alkuperäiseen tunnistettuun kieleen. Konepellin alle voi kurkistaa lisäämällä sulut "()" vinoviivakomennon ja tekstin väliin. Lisäasetuksia voi lisätä sulkujen sisälle, esim.
 • (fi) asettaa aloituskieleksi suomenkielen ja kääntää neljän satunnaisen kielen kautta takaisin suomenkieleen. Botti on välillä huono tunnistamaan kieliä, joten tätä kannattaa käyttää.
 • (7) kääntää tekstin seitsemän satunnaisen kielen kautta.
 
@@ -54,7 +151,7 @@ def translate_commands(input, print_option):
       else:
         q += 1
     # Tuetut kielet
-    lang_dict = GoogleTranslator.get_supported_languages(as_dict=True)
+    lang_dict = GoogleTranslator().get_supported_languages(as_dict=True)
     lang_longs = list(lang_dict.keys())
     lang_shorts = list(lang_dict.values())
     rev_lang_dict = {value : key for (key, value) in lang_dict.items()}
@@ -208,7 +305,7 @@ def remove_spaces_from_front(text):
   return text
 
 def pick_random_language(orig_lang, prev_lang, next_lang):
-  lang_dict = GoogleTranslator.get_supported_languages(as_dict=True)
+  lang_dict = GoogleTranslator().get_supported_languages(as_dict=True)
   lang_shorts = list(lang_dict.values())
   while next_lang == prev_lang or next_lang == orig_lang:
     next_lang = random.choice(lang_shorts)
@@ -219,9 +316,9 @@ def translate(update, context):
     update.message.reply_text(translate_commands(text, True))
 
 def translate_kenoviiva(update, context):
-    text = update.message.text
-    text = " ".join(text.split(" ")[1:])
-    text = remove_spaces_from_front(text)
+    text = remove_first_word(update.message.text)
+    #text = " ".join(text.split(" ")[1:])
+    #text = remove_spaces_from_front(text)
     if text == "":
       return
     waiting_message = update.message.reply_text("Odota hetki... vedän narusta...")
@@ -229,7 +326,7 @@ def translate_kenoviiva(update, context):
     waiting_message.delete()
 
 def print_langs(update, context):
-  lang_dict = GoogleTranslator.get_supported_languages(as_dict=True)
+  lang_dict = GoogleTranslator().get_supported_languages(as_dict=True)
   text = []
   for key, value in lang_dict.items():
     if key.islower() and value.islower():
@@ -463,8 +560,8 @@ Tempasikin, oo-o, tempasikin, oo-o, ...
 Tša-tša-tša!
 """]
   text = random.choice(texts)
-  commands = update.message.text
-  commands = " ".join(commands.split(" ")[1:])
+  commands = remove_first_word(update.message.text)
+  #commands = " ".join(commands.split(" ")[1:])
   commands = remove_spaces_from_front(commands)
   if commands == "" and text == texts[0]: # enkunkieliset
     update.message.reply_text(translate_commands("(en) " + text, False))
@@ -475,7 +572,11 @@ Tša-tša-tša!
   else:
     update.message.reply_text(translate_commands(commands + text, True))
     waiting_message.delete()
-  
+
+
+
+
+
 def main():
   
   # Create Updater object and attach dispatcher to it
@@ -488,13 +589,17 @@ def main():
   info_handler = CommandHandler('start',info)
   langs_handler = CommandHandler('kielet',print_langs)
   merimies_handler = CommandHandler('laulu',merimies)
+  completion_handler = CommandHandler('jatko',text_completion)
+  completion_tr_handler = CommandHandler('jatka',text_completion_old)
   
-  #translate_handler    = MessageHandler(Filters.text, translate)
+  translate_handler    = MessageHandler(Filters.text, translate)
   
   dispatcher.add_handler(info_handler)
   dispatcher.add_handler(langs_handler)
   dispatcher.add_handler(kenoviiva_translate_handler)
   dispatcher.add_handler(merimies_handler)
+  dispatcher.add_handler(completion_handler)
+  dispatcher.add_handler(completion_tr_handler)
   
   #dispatcher.add_handler(translate_handler)
 
